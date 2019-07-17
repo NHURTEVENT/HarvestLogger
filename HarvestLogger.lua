@@ -5,9 +5,14 @@ local LibAM = LibStub:GetLibrary ( "LibAddonMenu-2.0" )
 -- This isn't strictly necessary, but we'll use this string later when registering events.
 -- Better to define it in a single place rather than retyping the same string.
 HarvestLogger.name = "HarvestLogger"
+
  
 -- Next we create a function that will initialize our addon
 function HarvestLogger:Initialize()
+  
+  SLASH_COMMANDS['/harvlog'] = HarvestLogger.toggle
+
+  
    self.inCombat = IsUnitInCombat("player")
    
    EVENT_MANAGER:RegisterForEvent(self.name, EVENT_PLAYER_COMBAT_STATE, self.OnPlayerCombatState)
@@ -42,6 +47,13 @@ function HarvestLogger.OnAddOnLoaded(event, addonName)
   end
 end
  
+ 
+ function HarvestLogger.toggle()
+
+    HarvestLogger.LogEnabled = not HarvestLogger.LogEnabled
+    HarvestLogger.savedVariables.LogEnabled = HarvestLogger.LogEnabled
+end
+
  
 function HarvestLogger.LootReceived ( eventCode, lootedBy, itemLink, quantity, itemSound, lootType, self )
     if HarvestLogger.LogEnabled then
@@ -78,7 +90,6 @@ function HarvestLogger.AddonSettings()
 		displayName = "Harvest logger settings",
 		author = "@TheLordRassilon",
 		version = "0.1",
-		slashCommand = "/Harvlog settings",
 		registerForRefresh = true,
 		registerForDefaults = true
 	}
@@ -107,7 +118,24 @@ function HarvestLogger.AddonSettings()
         HarvestLogger.LogEnabled = LogEnabled
         HarvestLogger.savedVariables.LogEnabled = LogEnabled
 			end
+		},
+    
+		[3] = {
+			type = "checkbox",
+			name = "Write logs in chat",
+			default = true,
+			width = "full",
+			
+			getFunc = function ( )
+				return HarvestLogger.savedVariables.Verbose
+			end,
+			
+			setFunc = function (Verbose)
+        HarvestLogger.Verbose = Verbose
+        HarvestLogger.savedVariables.Verbose = Verbose
+			end
 		}		
+  
 	}
 	
 	LibAM:RegisterOptionControls ( "HarvestLoggerPanel", optionsData )
