@@ -1,14 +1,7 @@
--- First, we create a namespace for our addon by declaring a top-level table that will hold everything else.
 HarvestLogger = {}
-
 local LibAM = LibStub:GetLibrary ( "LibAddonMenu-2.0" )
--- This isn't strictly necessary, but we'll use this string later when registering events.
--- Better to define it in a single place rather than retyping the same string.
 HarvestLogger.name = "HarvestLogger"
 
-
- 
--- Next we create a function that will initialize our addon
 function HarvestLogger:Initialize()
   
   SLASH_COMMANDS['/harvlog'] = HarvestLogger.toggleAddon
@@ -29,7 +22,8 @@ function HarvestLogger:Initialize()
    HarvestLogger.Default = {
      LogEnabled = true,
      TimerStarted = false,
-     Time = true,
+     Time = 0,
+     TimeString = "",
      Verbose = true
     }
    
@@ -38,6 +32,7 @@ function HarvestLogger:Initialize()
    HarvestLogger.LogEnabled = HarvestLogger.savedVariables.LogEnabled
    HarvestLogger.TimerStarted = HarvestLogger.savedVariables.TimerStarted
    HarvestLogger.Time = HarvestLogger.savedVariables.Time
+   HarvestLogger.TimeString = HarvestLogger.savedVariables.TimeString
    HarvestLogger.Verbose = HarvestLogger.savedVariables.Verbose
    
    self.AddonSettings()
@@ -46,11 +41,9 @@ function HarvestLogger:Initialize()
    
    
 end
- 
--- Then we create an event handler function which will be called when the "addon loaded" event
--- occurs. We'll use this to initialize our addon after all of its resources are fully loaded.
+
 function HarvestLogger.OnAddOnLoaded(event, addonName)
-  -- The event fires each time *any* addon loads - but we only care about when our own addon loads.
+
   if addonName == HarvestLogger.name then
     HarvestLogger:Initialize()
   end
@@ -101,9 +94,23 @@ end
     if( HarvestLogger.TimerStarted) then
       d("Harvest logger timer switched on")
       --HarvestLogger.Timer = os.clock
-      d(""..os.date("%m/%d/%Y %I:%M %p"))
+      HarvestLogger.TimeString = ""..os.date("%m/%d/%Y %I:%M %p")
+      HarvestLogger.savedVariables.TimeString = HarvestLogger.TimeString
+      d(""..HarvestLogger.TimeString)
+      HarvestLogger.Time = os.time()
+      HarvestLogger.savedVariables.Time = HarvestLogger.Time     
     else
       d("Harvest logger timer switched off")
+      d("Timer began "..HarvestLogger.savedVariables.TimeString)
+      d("Timer ended "..os.date("%m/%d/%Y %I:%M %p"))
+      diff = os.difftime(os.time(), HarvestLogger.Time)
+      --d("time "..diff)
+      hours = math.floor(diff/3600)
+      diff = math.fmod(diff,3600)
+      minutes = math.floor(diff/60)
+      diff = math.fmod(diff,60)
+      seconds = diff
+      d(hours.." hours, "..minutes.." minutes, "..seconds.." seconds")
     end
 end
  
