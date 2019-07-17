@@ -6,12 +6,21 @@ local LibAM = LibStub:GetLibrary ( "LibAddonMenu-2.0" )
 -- Better to define it in a single place rather than retyping the same string.
 HarvestLogger.name = "HarvestLogger"
 
+
  
 -- Next we create a function that will initialize our addon
 function HarvestLogger:Initialize()
   
-  SLASH_COMMANDS['/harvlog'] = HarvestLogger.toggle
+  SLASH_COMMANDS['/harvlog'] = HarvestLogger.toggleAddon
+  SLASH_COMMANDS['/harvlog verbose'] = HarvestLogger.toggleVerbose
+  SLASH_COMMANDS['/harvlog timer' ] = HarvestLogger.toggleAddon
 
+  ZO_CreateStringId("SI_BINDING_NAME_TOGGLE_HARVESTLOGGER", "Toggle addon")
+  ZO_CreateStringId("SI_BINDING_NAME_TOGGLE_HARVESTLOGGER_VERBOSE", "Toggle chat log")
+  ZO_CreateStringId("SI_BINDING_NAME_TOGGLE_HARVESTLOGGER_TIMER", "Toggle timer")
+
+
+  HarvestLogger.AddKeyBind()
   
    self.inCombat = IsUnitInCombat("player")
    
@@ -47,13 +56,56 @@ function HarvestLogger.OnAddOnLoaded(event, addonName)
   end
 end
  
- 
- function HarvestLogger.toggle()
+ function HarvestLogger.AddKeyBind()
+   HarvestLogger.myButtonGroup = {
+    {
+      name = "Do Something",
+      keybind = "UI_HARVESTLOG_PRIMARY",
+      callback = function() HarvestLogger.toggleAddon() end,
+    },
+    {
+      name = "Do Something Else",
+      keybind = "UI_HARVESTLOG_SECONDARY",
+      callback = function() HarvestLogger.toggleVerbose() end,
+    },
+    alignment = KEYBIND_STRIP_ALIGN_CENTER,
+  }
 
+  KEYBIND_STRIP:AddKeybindButtonGroup(HarvestLogger.myButtonGroup)
+ end
+     
+ function HarvestLogger.toggleAddon()
     HarvestLogger.LogEnabled = not HarvestLogger.LogEnabled
     HarvestLogger.savedVariables.LogEnabled = HarvestLogger.LogEnabled
+    if( HarvestLogger.LogEnabled) then
+      d("Harvest logger switched on")
+    else
+      d("Harvest logger switched off")
+    end
+    
 end
 
+ function HarvestLogger.toggleVerbose()
+    HarvestLogger.Verbose = not HarvestLogger.Verbose
+    HarvestLogger.savedVariables.Verbose = HarvestLogger.Verbose
+    if( HarvestLogger.Verbose) then
+      d("Harvest logger chat switched on")
+    else
+      d("Harvest logger chat switched off")
+    end
+end
+
+ function HarvestLogger.toggleTimer()
+    HarvestLogger.TimerStarted = not HarvestLogger.TimerStarted
+    HarvestLogger.savedVariables.TimerStarted = HarvestLogger.TimerStarted
+    if( HarvestLogger.TimerStarted) then
+      d("Harvest logger timer switched on")
+      --HarvestLogger.Timer = os.clock
+      d(""..os.date("%m/%d/%Y %I:%M %p"))
+    else
+      d("Harvest logger timer switched off")
+    end
+end
  
 function HarvestLogger.LootReceived ( eventCode, lootedBy, itemLink, quantity, itemSound, lootType, self )
     if HarvestLogger.LogEnabled then
@@ -108,6 +160,7 @@ function HarvestLogger.AddonSettings()
 			type = "checkbox",
 			name = "Enable logs",
 			default = true,
+      tooltip = GetString(SI_HARVEST_LOGGER_ENABLE_LOGS),
 			width = "full",
 			
 			getFunc = function ( )
@@ -123,6 +176,7 @@ function HarvestLogger.AddonSettings()
 		[3] = {
 			type = "checkbox",
 			name = "Write logs in chat",
+      tooltip = GetString(SI_HARVEST_LOGGER_ENABLE_VERBOSE),
 			default = true,
 			width = "full",
 			

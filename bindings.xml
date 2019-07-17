@@ -1,0 +1,15 @@
+<Bindings>
+  <Layer name="SI_KEYBINDINGS_CATEGORY_GENERAL">
+    <Category name="|cFFFF32HARVEST LOGGER|r">
+      <Action name="TOGGLE_HARVESTLOGGER">
+        <Down>HarvestLogger.toggleAddon()</Down>
+      </Action>
+	  <Action name="TOGGLE_HARVESTLOGGER_VERBOSE">
+        <Down>HarvestLogger.toggleVerbose()</Down>
+      </Action>
+	  <Action name="TOGGLE_HARVESTLOGGER_TIMER">
+        <Down>HarvestLogger.toggleTimer()</Down>
+      </Action>
+    </Category>
+  </Layer>
+</Bindings>
