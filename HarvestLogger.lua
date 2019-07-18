@@ -1,6 +1,8 @@
 HarvestLogger = {}
 local LibAM = LibStub:GetLibrary ( "LibAddonMenu-2.0" )
 HarvestLogger.name = "HarvestLogger"
+HarvestLogger.lootedItems = {}
+HarvestLogger.version = 1
 
 function HarvestLogger:Initialize()
   
@@ -27,7 +29,8 @@ function HarvestLogger:Initialize()
      Verbose = true,
      ShowBag = true,
      ShowCraftBag = true,
-     ShowBank = true
+     ShowBank = true,
+     ItemsLog = {}
      --MakeStatistics 
      -- writes data in csv (or txt, whatev format)
      --stats must be enabled to keep track between deconnections
@@ -43,6 +46,8 @@ function HarvestLogger:Initialize()
    HarvestLogger.ShowBag = HarvestLogger.savedVariables.ShowBag
    HarvestLogger.ShowCraftBag = HarvestLogger.savedVariables.ShowCraftBag
    HarvestLogger.ShowBank = HarvestLogger.savedVariables.ShowBank
+   HarvestLogger.ItemsLog = HarvestLogger.savedVariables.ItemsLog
+
    
    self.AddonSettings()
    
@@ -120,6 +125,11 @@ end
       diff = math.fmod(diff,60)
       seconds = diff
       d(hours.." hours, "..minutes.." minutes, "..seconds.." seconds")
+      
+      --print the logs
+      
+      HarvestLogger.ItemsLog = {}
+      HarvestLogger.savedVariables.ItemsLog = {}
     end
 end
  
@@ -139,7 +149,7 @@ function HarvestLogger.LootReceived ( eventCode, lootedBy, itemLink, quantity, i
 				end
 				
 				if stackCountBank > 1.0 and HarvestLogger.savedVariables.ShowCraftBag then
-					item_total_count = zo_strformat ( "<<1>> (|t24:24:esoui/art/tooltips/icon_bank.dds|t <<2>>)",
+					item_total_count = zo_strformat ( "<<1>> (|t18:18:esoui/art/tooltips/icon_bank.dds|t <<2>>)",
 					item_total_count, comma_value ( stackCountBank ))
 				end
 				
@@ -150,6 +160,41 @@ function HarvestLogger.LootReceived ( eventCode, lootedBy, itemLink, quantity, i
       local icon, sellPrice, meetsUsageRequirement, equipType, itemStyle = GetItemLinkInfo (itemLink )
       iconLogo = zo_strformat ( "|t24:24:<<1>>|t", icon )
       d("Looted "..quantity.." "..iconLogo.." "..itemLink.." "..item_total_count)
+      
+      local LogEntry = {
+          ["itemLink"] = itemLink,
+          ["quantity"] = quantity,
+          ["price"] = 5
+        }
+      
+      
+      table.insert(HarvestLogger.ItemsLog, LogEntry)
+      HarvestLogger.savedVariables.ItemsLog = HarvestLogger.ItemsLog
+
+      
+      path = "test.lua"
+      --local file = io.open( path, "w" )
+      --io.close(path)
+      --if file then
+        
+      --else
+      --  file = io.open( path, "w" )
+      --  file:write(" ")
+      --  io.close(file)
+      --end
+      -- Opens a file in read
+      --file = io.open("test.lua", "w")
+
+      -- sets the default input file as test.lua
+      --io.input(file)
+      --file:write("--test")
+
+      -- prints the first line of the file
+      --print(io.read())
+
+      -- closes the open file
+      --io.close(file)
+      
     --string itemLink
     --lootType lootType
     --int quantity
@@ -214,7 +259,7 @@ function HarvestLogger.AddonSettings()
 		name = "Harvest Logger",
 		displayName = "Harvest logger settings",
 		author = "@TheLordRassilon",
-		version = "0.1",
+		version = "0.4",
 		registerForRefresh = true,
 		registerForDefaults = true
 	}

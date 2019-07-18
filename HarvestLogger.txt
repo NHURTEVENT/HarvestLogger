@@ -1,6 +1,6 @@
 ## Title: HarvestLogger Addon
 ## APIVersion: 100027
-
+## SavedVariables: HarvestLoggerVariables
 
 Libs/LibAddonMenu-2.0/LibAddonMenu-2.0.lua
 
