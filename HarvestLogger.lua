@@ -13,7 +13,7 @@ function HarvestLogger:Initialize()
   ZO_CreateStringId("SI_BINDING_NAME_TOGGLE_HARVESTLOGGER_TIMER", "Toggle timer")
 
 
-  HarvestLogger.AddKeyBind()
+  --HarvestLogger.AddKeyBind()
   
    self.inCombat = IsUnitInCombat("player")
    
@@ -24,7 +24,13 @@ function HarvestLogger:Initialize()
      TimerStarted = false,
      Time = 0,
      TimeString = "",
-     Verbose = true
+     Verbose = true,
+     ShowBag = true,
+     ShowCraftBag = true,
+     ShowBank = true
+     --MakeStatistics 
+     -- writes data in csv (or txt, whatev format)
+     --stats must be enabled to keep track between deconnections
     }
    
    HarvestLogger.savedVariables = ZO_SavedVars:NewAccountWide ( "HarvestLoggerVariables", HarvestLogger.version, nil, HarvestLogger.Default )
@@ -34,6 +40,9 @@ function HarvestLogger:Initialize()
    HarvestLogger.Time = HarvestLogger.savedVariables.Time
    HarvestLogger.TimeString = HarvestLogger.savedVariables.TimeString
    HarvestLogger.Verbose = HarvestLogger.savedVariables.Verbose
+   HarvestLogger.ShowBag = HarvestLogger.savedVariables.ShowBag
+   HarvestLogger.ShowCraftBag = HarvestLogger.savedVariables.ShowCraftBag
+   HarvestLogger.ShowBank = HarvestLogger.savedVariables.ShowBank
    
    self.AddonSettings()
    
@@ -49,23 +58,23 @@ function HarvestLogger.OnAddOnLoaded(event, addonName)
   end
 end
  
- function HarvestLogger.AddKeyBind()
-   HarvestLogger.myButtonGroup = {
-    {
-      name = "Do Something",
-      keybind = "UI_HARVESTLOG_PRIMARY",
-      callback = function() HarvestLogger.toggleAddon() end,
-    },
-    {
-      name = "Do Something Else",
-      keybind = "UI_HARVESTLOG_SECONDARY",
-      callback = function() HarvestLogger.toggleVerbose() end,
-    },
-    alignment = KEYBIND_STRIP_ALIGN_CENTER,
-  }
+ --function HarvestLogger.AddKeyBind()
+ --  HarvestLogger.myButtonGroup = {
+ --   {
+ --     name = "Do Something",
+ --     keybind = "UI_HARVESTLOG_PRIMARY",
+ --     callback = function() HarvestLogger.toggleAddon() end,
+ --   },
+ --   {
+ --     name = "Do Something Else",
+ --     keybind = "UI_HARVESTLOG_SECONDARY",
+ --     callback = function() HarvestLogger.toggleVerbose() end,
+ --   },
+ --   alignment = KEYBIND_STRIP_ALIGN_CENTER,
+ -- }
 
-  KEYBIND_STRIP:AddKeybindButtonGroup(HarvestLogger.myButtonGroup)
- end
+ -- KEYBIND_STRIP:AddKeybindButtonGroup(HarvestLogger.myButtonGroup)
+ --end
      
  function HarvestLogger.toggleAddon()
     HarvestLogger.LogEnabled = not HarvestLogger.LogEnabled
@@ -115,11 +124,68 @@ end
 end
  
 function HarvestLogger.LootReceived ( eventCode, lootedBy, itemLink, quantity, itemSound, lootType, self )
-    if HarvestLogger.LogEnabled then
-      d("looted")
+    if HarvestLogger.LogEnabled and HarvestLogger.TimerStarted then
+      
+      --local name = GetItemLinkName(itemLink) -- may contain localization control codes
+ 
+      --local formattedName = LocalizeString("<<1>>", name) -- no control codes
+      --d("looted "..formattedName)
+      local stackCountBackpack, stackCountBank, stackCountCraftBag = GetItemLinkStacks ( itemLink )
+      local item_total_count = ""
+				
+				if stackCountBackpack > 1.0 and HarvestLogger.savedVariables.ShowBag then
+					item_total_count = zo_strformat ( "<<1>> (|t18:18:esoui/art/tooltips/icon_bag.dds|t <<2>>)",
+					item_total_count, comma_value ( stackCountBackpack ))
+				end
+				
+				if stackCountBank > 1.0 and HarvestLogger.savedVariables.ShowCraftBag then
+					item_total_count = zo_strformat ( "<<1>> (|t24:24:esoui/art/tooltips/icon_bank.dds|t <<2>>)",
+					item_total_count, comma_value ( stackCountBank ))
+				end
+				
+				if stackCountCraftBag > 1.0 and HarvestLogger.savedVariables.ShowBank then
+					item_total_count = zo_strformat ( "<<1>> (|t24:24:esoui/art/tooltips/icon_craft_bag.dds|t <<2>>)",item_total_count, comma_value ( stackCountCraftBag ))
+        end
+      
+      local icon, sellPrice, meetsUsageRequirement, equipType, itemStyle = GetItemLinkInfo (itemLink )
+      iconLogo = zo_strformat ( "|t24:24:<<1>>|t", icon )
+      d("Looted "..quantity.." "..iconLogo.." "..itemLink.." "..item_total_count)
+    --string itemLink
+    --lootType lootType
+    --int quantity
+    --string lootedBy
+      
+    --if quantity == 1.0 then
+    --    z = zo_strformat ( "<<1>>You looted <<2>> <<3>> <<4>> <<5>>",
+    --    x, temp_Icon, itemLink, y, item_total_count )
+    --  else
+    --    z = zo_strformat ( "<<1>>You looted <<2>> x <<3>> <<4>> <<5>> <<6>>",
+    --    x, quantity, temp_Icon, itemLink, y, item_total_count )
+    --  end
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
     end
 end
   
+ function comma_value(amount)
+  local formatted = amount
+  while true do  
+    formatted, k = string.gsub(formatted, "^(-?%d+)(%d%d%d)", '%1,%2')
+    if (k==0) then
+      break
+    end
+  end
+  return formatted
+end
+ 
  
  function HarvestLogger.OnPlayerCombatState(event, inCombat)
   -- The ~= operator is "not equal to" in Lua.
@@ -195,7 +261,52 @@ function HarvestLogger.AddonSettings()
         HarvestLogger.Verbose = Verbose
         HarvestLogger.savedVariables.Verbose = Verbose
 			end
-		}		
+		},		
+    [4] = {
+			type = "checkbox",
+			name = "Show amount in bag",
+			default = true,
+			width = "full",
+			
+			getFunc = function ( )
+				return HarvestLogger.savedVariables.ShowBag
+			end,
+			
+			setFunc = function (ShowBag)
+        HarvestLogger.ShowBag = ShowBag
+        HarvestLogger.savedVariables.ShowBag = ShowBag
+			end
+		},
+    [5] = {
+			type = "checkbox",
+			name = "Show amount in crafting bag",
+			default = true,
+			width = "full",
+			
+			getFunc = function ( )
+				return HarvestLogger.savedVariables.ShowCraftBag
+			end,
+			
+			setFunc = function (ShowCraftBag)
+        HarvestLogger.ShowCraftBag = ShowCraftBag
+        HarvestLogger.savedVariables.ShowCraftBag = ShowCraftBag
+			end
+		},
+    [6] = {
+			type = "checkbox",
+			name = "Show amount in bank",
+			default = true,
+			width = "full",
+			
+			getFunc = function ( )
+				return HarvestLogger.savedVariables.ShowBank
+			end,
+			
+			setFunc = function (ShowBank)
+        HarvestLogger.ShowBank = ShowBank
+        HarvestLogger.savedVariables.ShowBank = ShowBank
+			end
+		}
   
 	}
 	
