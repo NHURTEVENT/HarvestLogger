@@ -114,6 +114,7 @@ end
       HarvestLogger.Time = os.time()
       HarvestLogger.savedVariables.Time = HarvestLogger.Time     
     else
+      
       d("Harvest logger timer switched off")
       d("Timer began "..HarvestLogger.savedVariables.TimeString)
       d("Timer ended "..os.date("%m/%d/%Y %I:%M %p"))
@@ -125,8 +126,22 @@ end
       diff = math.fmod(diff,60)
       seconds = diff
       d(hours.." hours, "..minutes.." minutes, "..seconds.." seconds")
-      
+      --[[
+      if next(HarvestLogger.savedVariables.ItemsLog) == nil then
+        d("found log to be null")
+      else 
+        d("log not null")    
+      end
+      --]]
       --print the logs
+      for key,value in pairs(HarvestLogger.ItemsLog) do
+        --d("in for")
+        local icon, sellPrice, meetsUsageRequirement, equipType, itemStyle = GetItemLinkInfo (key)
+        --d("got icon")
+        iconLogo = zo_strformat ( "|t24:24:<<1>>|t", icon )
+        d("Looted "..value.." "..iconLogo.." "..key.." price X")
+        
+      end
       
       HarvestLogger.ItemsLog = {}
       HarvestLogger.savedVariables.ItemsLog = {}
@@ -167,12 +182,22 @@ function HarvestLogger.LootReceived ( eventCode, lootedBy, itemLink, quantity, i
           ["price"] = 5
         }
       
+      if HarvestLogger.ItemsLog[itemLink] == nil then
+        --d("create new item")
+        HarvestLogger.ItemsLog[itemLink] = quantity
+        --d("null?")
+      else 
+        --d("will add")
+        --d("add to"..HarvestLogger.ItemsLog[itemLink]) 
+        HarvestLogger.ItemsLog[itemLink] = HarvestLogger.ItemsLog[itemLink] + quantity
+
+      end
       
-      table.insert(HarvestLogger.ItemsLog, LogEntry)
-      HarvestLogger.savedVariables.ItemsLog = HarvestLogger.ItemsLog
+      --table.insert(HarvestLogger.ItemsLog, LogEntry)
+      --HarvestLogger.savedVariables.ItemsLog = HarvestLogger.ItemsLog
 
       
-      path = "test.lua"
+      --path = "test.lua"
       --local file = io.open( path, "w" )
       --io.close(path)
       --if file then
@@ -259,7 +284,7 @@ function HarvestLogger.AddonSettings()
 		name = "Harvest Logger",
 		displayName = "Harvest logger settings",
 		author = "@TheLordRassilon",
-		version = "0.4",
+		version = "0.6",
 		registerForRefresh = true,
 		registerForDefaults = true
 	}
