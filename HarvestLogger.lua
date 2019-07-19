@@ -63,23 +63,6 @@ function HarvestLogger.OnAddOnLoaded(event, addonName)
   end
 end
  
- --function HarvestLogger.AddKeyBind()
- --  HarvestLogger.myButtonGroup = {
- --   {
- --     name = "Do Something",
- --     keybind = "UI_HARVESTLOG_PRIMARY",
- --     callback = function() HarvestLogger.toggleAddon() end,
- --   },
- --   {
- --     name = "Do Something Else",
- --     keybind = "UI_HARVESTLOG_SECONDARY",
- --     callback = function() HarvestLogger.toggleVerbose() end,
- --   },
- --   alignment = KEYBIND_STRIP_ALIGN_CENTER,
- -- }
-
- -- KEYBIND_STRIP:AddKeybindButtonGroup(HarvestLogger.myButtonGroup)
- --end
      
  function HarvestLogger.toggleAddon()
     HarvestLogger.LogEnabled = not HarvestLogger.LogEnabled
@@ -139,7 +122,7 @@ end
         local icon, sellPrice, meetsUsageRequirement, equipType, itemStyle = GetItemLinkInfo (key)
         --d("got icon")
         iconLogo = zo_strformat ( "|t24:24:<<1>>|t", icon )
-        d("Looted "..value.." "..iconLogo.." "..key.." price X")
+        d("Looted "..value.quantity.." "..iconLogo.." "..key.." price X, level"..value.level)
         
       end
       
@@ -175,6 +158,16 @@ function HarvestLogger.LootReceived ( eventCode, lootedBy, itemLink, quantity, i
       local icon, sellPrice, meetsUsageRequirement, equipType, itemStyle = GetItemLinkInfo (itemLink )
       iconLogo = zo_strformat ( "|t24:24:<<1>>|t", icon )
       d("Looted "..quantity.." "..iconLogo.." "..itemLink.." "..item_total_count)
+      local rank = GetItemLinkRequiredCraftingSkillRank(itemLink)
+      local known,trait= GetItemLinkReagentTraitInfo(itemLink, 1)
+      local refined = GetItemLinkRefinedMaterialItemLink(itemLink)
+      d("rank "..rank)
+      if trait ~= nil then
+        d("trait "..trait)
+      end
+      if refined ~= nil then
+        d("refined "..refined)
+      end
       
       local LogEntry = {
           ["itemLink"] = itemLink,
@@ -184,64 +177,20 @@ function HarvestLogger.LootReceived ( eventCode, lootedBy, itemLink, quantity, i
       
       if HarvestLogger.ItemsLog[itemLink] == nil then
         --d("create new item")
-        HarvestLogger.ItemsLog[itemLink] = quantity
+        HarvestLogger.ItemsLog[itemLink] = {}
+        HarvestLogger.savedVariables.ItemsLog[itemLink] = {}
+        HarvestLogger.ItemsLog[itemLink].quantity = quantity
+        HarvestLogger.savedVariables.ItemsLog[itemLink].quantity = quantity
+        
+        HarvestLogger.ItemsLog[itemLink].level = rank
+        HarvestLogger.savedVariables.ItemsLog[itemLink].level = rank
         --d("null?")
       else 
         --d("will add")
         --d("add to"..HarvestLogger.ItemsLog[itemLink]) 
-        HarvestLogger.ItemsLog[itemLink] = HarvestLogger.ItemsLog[itemLink] + quantity
-
+        HarvestLogger.ItemsLog[itemLink].quantity = HarvestLogger.ItemsLog[itemLink].quantity + quantity
+        HarvestLogger.savedVariables.ItemsLog[itemLink].quantity =  HarvestLogger.savedVariables.ItemsLog[itemLink].quantity + quantity
       end
-      
-      --table.insert(HarvestLogger.ItemsLog, LogEntry)
-      --HarvestLogger.savedVariables.ItemsLog = HarvestLogger.ItemsLog
-
-      
-      --path = "test.lua"
-      --local file = io.open( path, "w" )
-      --io.close(path)
-      --if file then
-        
-      --else
-      --  file = io.open( path, "w" )
-      --  file:write(" ")
-      --  io.close(file)
-      --end
-      -- Opens a file in read
-      --file = io.open("test.lua", "w")
-
-      -- sets the default input file as test.lua
-      --io.input(file)
-      --file:write("--test")
-
-      -- prints the first line of the file
-      --print(io.read())
-
-      -- closes the open file
-      --io.close(file)
-      
-    --string itemLink
-    --lootType lootType
-    --int quantity
-    --string lootedBy
-      
-    --if quantity == 1.0 then
-    --    z = zo_strformat ( "<<1>>You looted <<2>> <<3>> <<4>> <<5>>",
-    --    x, temp_Icon, itemLink, y, item_total_count )
-    --  else
-    --    z = zo_strformat ( "<<1>>You looted <<2>> x <<3>> <<4>> <<5>> <<6>>",
-    --    x, quantity, temp_Icon, itemLink, y, item_total_count )
-    --  end
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
     end
 end
   
