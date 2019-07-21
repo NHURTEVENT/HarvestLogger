@@ -117,12 +117,48 @@ end
       end
       --]]
       --print the logs
+      
+      
+      --[[
       for key,value in pairs(HarvestLogger.ItemsLog) do
         --d("in for")
         local icon, sellPrice, meetsUsageRequirement, equipType, itemStyle = GetItemLinkInfo (key)
         --d("got icon")
         iconLogo = zo_strformat ( "|t24:24:<<1>>|t", icon )
-        d("Looted "..value.quantity.." "..iconLogo.." "..key.." price X, level"..value.level)
+        d("Looted "..value.quantity.." "..iconLogo.." "..key.." price X, level"..value.level.."type: "..value.itemType)
+        
+      end
+      --]]
+      --HarvestLogger.ItemsLog = {}
+      --HarvestLogger.savedVariables.ItemsLog = {}
+      
+      local displayRawMat = true
+      --d("before for")
+      for key,value in pairs(HarvestLogger.ItemsLog) do
+        d("----------------1")
+        d(""..key)
+        for key2, value2 in pairs(value) do
+          d("----------------2")
+          d(""..key2)
+          for key3, value3 in pairs(value2) do
+            local icon, sellPrice, meetsUsageRequirement, equipType, itemStyle = GetItemLinkInfo (key3)
+            --d("got icon")
+            iconLogo = zo_strformat ( "|t24:24:<<1>>|t", icon )
+            
+            d("Looted "..value3.quantity.." "..iconLogo.." "..key3.." price X")
+          end
+        end
+        --[[
+        if displayRawMat then--and value == rawMats then
+          d("past if")
+          for matType,mats in pairs(value) do
+            d("for mattype")
+            for matLink, matQuantity in pairs(mats) do
+              d(""..matLink..": "..matQuantity)
+            end
+          end
+        end
+        --]]
         
       end
       
@@ -161,37 +197,355 @@ function HarvestLogger.LootReceived ( eventCode, lootedBy, itemLink, quantity, i
       local rank = GetItemLinkRequiredCraftingSkillRank(itemLink)
       local known,trait= GetItemLinkReagentTraitInfo(itemLink, 1)
       local refined = GetItemLinkRefinedMaterialItemLink(itemLink)
-      d("rank "..rank)
+      local itemType = GetItemLinkItemType(itemLink)
+      --d("rank "..rank)
+      
+      --[[
       if trait ~= nil then
         d("trait "..trait)
       end
       if refined ~= nil then
         d("refined "..refined)
       end
+      if itemType ~= nil then
+        d("itemType "..itemType)
+      end
+      --]]
       
       local LogEntry = {
           ["itemLink"] = itemLink,
           ["quantity"] = quantity,
           ["price"] = 5
         }
-      
+      --[[
       if HarvestLogger.ItemsLog[itemLink] == nil then
         --d("create new item")
         HarvestLogger.ItemsLog[itemLink] = {}
-        HarvestLogger.savedVariables.ItemsLog[itemLink] = {}
+        HarvestLogger.ItemsLog.rawMats = {}
+        HarvestLogger.ItemsLog.rawMats.blacksmith = {}
+        HarvestLogger.ItemsLog.rawMats.clothier = {}
+        HarvestLogger.ItemsLog.rawMats.woodworking = {}
+        HarvestLogger.ItemsLog.rawMats.jewelry = {}
+        HarvestLogger.ItemsLog.runes = {}
+        HarvestLogger.ItemsLog.runes.potency = {}
+        HarvestLogger.ItemsLog.runes.aspect = {}
+        HarvestLogger.ItemsLog.runes.essence = {}
+
+        d("created categories")
+        
+        HarvestLogger.savedVariables.ItemsLog[itemLink] = HarvestLogger.ItemsLog[itemLink]
         HarvestLogger.ItemsLog[itemLink].quantity = quantity
         HarvestLogger.savedVariables.ItemsLog[itemLink].quantity = quantity
         
         HarvestLogger.ItemsLog[itemLink].level = rank
         HarvestLogger.savedVariables.ItemsLog[itemLink].level = rank
+        
+        HarvestLogger.ItemsLog[itemLink].itemType = itemType
+        HarvestLogger.savedVariables.ItemsLog[itemLink].itemType = itemType
+        
+        
+        
         --d("null?")
       else 
+      --]]
+      
         --d("will add")
         --d("add to"..HarvestLogger.ItemsLog[itemLink]) 
-        HarvestLogger.ItemsLog[itemLink].quantity = HarvestLogger.ItemsLog[itemLink].quantity + quantity
-        HarvestLogger.savedVariables.ItemsLog[itemLink].quantity =  HarvestLogger.savedVariables.ItemsLog[itemLink].quantity + quantity
+        if HarvestLogger.ItemsLog.rawMats == nil then
+        --d("create new item")
+          --HarvestLogger.ItemsLog[itemLink] = {}
+          
+          HarvestLogger.ItemsLog.rawMats = {}
+          HarvestLogger.ItemsLog.rawMats.blacksmith = {}
+          HarvestLogger.ItemsLog.rawMats.clothier = {}
+          HarvestLogger.ItemsLog.rawMats.woodworking = {}
+          HarvestLogger.ItemsLog.rawMats.jewelry = {}
+          HarvestLogger.ItemsLog.rawMats.alchemy = {}
+          HarvestLogger.ItemsLog.rawMats.default = {}
+          HarvestLogger.ItemsLog.runes = {}
+          HarvestLogger.ItemsLog.runes.potency = {}
+          HarvestLogger.ItemsLog.runes.aspect = {}
+          HarvestLogger.ItemsLog.runes.essence = {}
+
+          d("created categories")
+          HarvestLogger.savedVariables.ItemsLog = HarvestLogger.ItemsLog
+          d("created saved cat")
+        end
+        
+        
+        case = {
+          [35] = function ( ) 
+            --d("in case 35")
+            if HarvestLogger.ItemsLog.rawMats.blacksmith[itemLink] == nil then
+              --d("create entry in case 35")
+              HarvestLogger.ItemsLog.rawMats.blacksmith[itemLink] = {}
+              d("created empty table0")
+              HarvestLogger.savedVariables.ItemsLog.rawMats.blacksmith[itemLink] = {}
+              d("created empty table1")
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink][quantity] = {}
+              --d("created empty table2")
+              HarvestLogger.ItemsLog.rawMats.blacksmith[itemLink]["quantity"] =  quantity
+              HarvestLogger.savedVariables.ItemsLog.rawMats.blacksmith[itemLink]["quantity"] =  quantity
+
+              --d("added quantity")
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink][quantity] = HarvestLogger.ItemsLog.rawMats.blacksmith[itemLink][quantity]
+              --d("created empty table in savedvar")
+            else
+              --d("case 35 wasn't null")
+              HarvestLogger.ItemsLog.rawMats.blacksmith[itemLink]["quantity"] = HarvestLogger.ItemsLog.rawMats.blacksmith[itemLink]["quantity"] + quantity
+              --d("add1")
+              HarvestLogger.savedVariables.ItemsLog.rawMats.blacksmith[itemLink]["quantity"] = HarvestLogger.ItemsLog.rawMats.blacksmith[itemLink]["quantity"]
+              --d("add2")
+            end
+          end,  
+          ["default"] = function()
+            d("in case default")
+            --HarvestLogger.ItemsLog[itemLink].quantity = HarvestLogger.ItemsLog[itemLink].quantity + quantity
+            --HarvestLogger.savedVariables.ItemsLog[itemLink].quantity =  HarvestLogger.savedVariables.ItemsLog[itemLink].quantity + quantity
+            if HarvestLogger.ItemsLog.rawMats.default[itemLink] == nil then
+              HarvestLogger.ItemsLog.rawMats.default[itemLink] = {}
+              d("created empty table0")
+              HarvestLogger.savedVariables.ItemsLog.rawMats.default[itemLink] = {}
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink] = {}
+              d("created empty table1")
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink][quantity] = {}
+              --d("created empty table2")
+              HarvestLogger.ItemsLog.rawMats.default[itemLink]["quantity"] =  quantity
+              HarvestLogger.savedVariables.ItemsLog.rawMats.default[itemLink]["quantity"] =  quantity
+
+              --d("added quantity")
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink][quantity] = HarvestLogger.ItemsLog.rawMats.blacksmith[itemLink][quantity]
+              --d("created empty table in savedvar")
+            else
+              d("case default wasn't null")
+              HarvestLogger.ItemsLog.rawMats.default[itemLink]["quantity"] = HarvestLogger.ItemsLog.rawMats.default[itemLink]["quantity"] + quantity
+              d("case default not null done")
+              HarvestLogger.savedVariables.ItemsLog.rawMats.default[itemLink]["quantity"] = HarvestLogger.ItemsLog.rawMats.default[itemLink]["quantity"]
+            end
+          end,
+          
+          [53] = function()
+            --d("rune triangle")
+            --HarvestLogger.ItemsLog[itemLink].quantity = HarvestLogger.ItemsLog[itemLink].quantity + quantity
+            --HarvestLogger.savedVariables.ItemsLog[itemLink].quantity =  HarvestLogger.savedVariables.ItemsLog[itemLink].quantity + quantity
+
+            
+            if HarvestLogger.ItemsLog.runes["aspect"][itemLink] == nil then
+              --d("in if")
+            HarvestLogger.ItemsLog.runes["aspect"][itemLink] = {}
+              --d("created empty table0")
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink] = {}
+              --d("created empty table1")
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink][quantity] = {}
+              --d("created empty table2")
+              HarvestLogger.ItemsLog.runes["aspect"][itemLink]["quantity"] =  quantity
+              --d("added quantity")
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink][quantity] = HarvestLogger.ItemsLog.rawMats.blacksmith[itemLink][quantity]
+              --d("created empty table in savedvar")
+            else
+              --d("case default wasn't null")
+               HarvestLogger.ItemsLog.runes["aspect"][itemLink]["quantity"] = HarvestLogger.ItemsLog.runes["aspect"][itemLink]["quantity"] + quantity
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.default[itemLink]["quantity"] = HarvestLogger.ItemsLog.rawMats.default[itemLink]["quantity"]
+            end
+          end,
+          
+          [51] = function()
+            --d("rune carre")
+            
+            if HarvestLogger.ItemsLog.runes["potency"][itemLink] == nil then
+              --d("in if")
+            HarvestLogger.ItemsLog.runes["potency"][itemLink] = {}
+              --d("created empty table0")
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink] = {}
+              --d("created empty table1")
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink][quantity] = {}
+              --d("created empty table2")
+              HarvestLogger.ItemsLog.runes["potency"][itemLink]["quantity"] =  quantity
+              --d("added quantity")
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink][quantity] = HarvestLogger.ItemsLog.rawMats.blacksmith[itemLink][quantity]
+              --d("created empty table in savedvar")
+            else
+              --d("case default wasn't null")
+               HarvestLogger.ItemsLog.runes["potency"][itemLink]["quantity"] = HarvestLogger.ItemsLog.runes["potency"][itemLink]["quantity"] + quantity
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.default[itemLink]["quantity"] = HarvestLogger.ItemsLog.rawMats.default[itemLink]["quantity"]
+            end
+          end,
+          
+          
+          [52] = function()
+            --d("rune ronde")
+            --HarvestLogger.ItemsLog[itemLink].quantity = HarvestLogger.ItemsLog[itemLink].quantity + quantity
+            --HarvestLogger.savedVariables.ItemsLog[itemLink].quantity =  HarvestLogger.savedVariables.ItemsLog[itemLink].quantity + quantity
+             
+            if HarvestLogger.ItemsLog.runes["essence"][itemLink] == nil then
+              --d("in if")
+            HarvestLogger.ItemsLog.runes["essence"][itemLink] = {}
+              --d("created empty table0")
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink] = {}
+              --d("created empty table1")
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink][quantity] = {}
+              --d("created empty table2")
+              HarvestLogger.ItemsLog.runes["essence"][itemLink]["quantity"] =  quantity
+              --d("added quantity")
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink][quantity] = HarvestLogger.ItemsLog.rawMats.blacksmith[itemLink][quantity]
+              --d("created empty table in savedvar")
+            else
+              --d("case default wasn't null")
+               HarvestLogger.ItemsLog.runes["essence"][itemLink]["quantity"] = HarvestLogger.ItemsLog.runes["essence"][itemLink]["quantity"] + quantity
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.default[itemLink]["quantity"] = HarvestLogger.ItemsLog.rawMats.default[itemLink]["quantity"]
+            end
+          end,
+          
+          
+          --[[
+          [39] = function ( ) 
+            d("in case 39")
+            if HarvestLogger.ItemsLog.rawMats.clothier[itemLink] == nil then
+              d("create entry in case 39")
+              HarvestLogger.ItemsLog.rawMats.clothier[itemLink] = {}
+              d("created empty table and trying to do same in savevar")
+              HarvestLogger.saveVariables.ItemsLog.rawMats.clothier[itemLink] = {}
+              d("created empty table in savevar")
+              HarvestLogger.ItemsLog.rawMats.clothier[itemLink].quantity =  quantity
+              d("added quantity")
+              HarvestLogger.saveVariables.ItemsLog.rawMats.clothier[itemLink].quantity = HarvestLogger.ItemsLog.rawMats.clothier[itemLink].quantity
+              d("created empty table in savedvar")
+            else
+              d("case 39 wasn't null")
+              HarvestLogger.ItemsLog.rawMats.clothier[itemLink].quantity = HarvestLogger.ItemsLog.rawMats.clothier[itemLink].quantity + quantity
+              HarvestLogger.saveVariables.ItemsLog.rawMats.clothier[itemLink].quantity = HarvestLogger.ItemsLog.rawMats.clothier[itemLink].quantity
+            end
+          end,
+          
+          [37] = function ( ) 
+            d("in case 37")
+            if HarvestLogger.ItemsLog.rawMats.woodworking[itemLink] == nil then
+              d("create entry in case 37")
+              HarvestLogger.ItemsLog.rawMats.woodworking[itemLink] = {}
+              HarvestLogger.saveVariables.ItemsLog.rawMats.woodworking[itemLink] = {}
+              d("created empty table")
+              HarvestLogger.ItemsLog.rawMats.woodworking[itemLink].quantity =  quantity
+              d("added quantity")
+              HarvestLogger.saveVariables.ItemsLog.rawMats.woodworking[itemLink].quantity = HarvestLogger.ItemsLog.rawMats.woodworking[itemLink].quantity
+              d("created empty table in savedvar")
+            else
+              d("case 37 wasn't null")
+              HarvestLogger.ItemsLog.rawMats.woodworking[itemLink].quantity = HarvestLogger.ItemsLog.rawMats.woodworking[itemLink].quantity + quantity
+              HarvestLogger.saveVariables.ItemsLog.rawMats.woodworking[itemLink].quantity = HarvestLogger.ItemsLog.rawMats.woodworking[itemLink].quantity
+            end
+          end,
+          }
+        if case[itemType] then 
+          d("do case")
+          case[itemType]()
+        else 
+          d("do default")
+          case["default"]()
+        end
+        
+        --HarvestLogger.ItemsLog[itemLink].quantity = HarvestLogger.ItemsLog[itemLink].quantity + quantity
+        --HarvestLogger.savedVariables.ItemsLog[itemLink].quantity =  HarvestLogger.savedVariables.ItemsLog[itemLink].quantity + quantity
+
       end
+    --end
+    --]]
+          [39] = function ( ) 
+            --d("in case 39")
+            if HarvestLogger.ItemsLog.rawMats.clothier[itemLink] == nil then
+              --d("create entry in case 39")
+              HarvestLogger.ItemsLog.rawMats.clothier[itemLink] = {}
+              --d("created empty table0")
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink] = {}
+              --d("created empty table1")
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink][quantity] = {}
+              --d("created empty table2")
+              HarvestLogger.ItemsLog.rawMats.clothier[itemLink]["quantity"] =  quantity
+              --d("added quantity")
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink][quantity] = HarvestLogger.ItemsLog.rawMats.blacksmith[itemLink][quantity]
+              --d("created empty table in savedvar")
+            else
+              --d("case 39 wasn't null")
+              HarvestLogger.ItemsLog.rawMats.clothier[itemLink]["quantity"] = HarvestLogger.ItemsLog.rawMats.clothier[itemLink]["quantity"] + quantity
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.clothier[itemLink]["quantity"] = HarvestLogger.ItemsLog.rawMats.clothier[itemLink]["quantity"]
+            end
+          end, 
+          [37] = function ( ) 
+            --d("in case 37")
+            if HarvestLogger.ItemsLog.rawMats.woodworking[itemLink] == nil then
+              --d("create entry in case 37")
+              HarvestLogger.ItemsLog.rawMats.woodworking[itemLink] = {}
+              --d("created empty table0")
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink] = {}
+              --d("created empty table1")
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink][quantity] = {}
+              --d("created empty table2")
+              HarvestLogger.ItemsLog.rawMats.woodworking[itemLink]["quantity"] =  quantity
+              --d("added quantity")
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink][quantity] = HarvestLogger.ItemsLog.rawMats.blacksmith[itemLink][quantity]
+              --d("created empty table in savedvar")
+            else
+              --d("case 37 wasn't null")
+              HarvestLogger.ItemsLog.rawMats.woodworking[itemLink]["quantity"] = HarvestLogger.ItemsLog.rawMats.woodworking[itemLink]["quantity"] + quantity
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.woodworking[itemLink]["quantity"] = HarvestLogger.ItemsLog.rawMats.woodworking[itemLink]["quantity"]
+            end
+          end,
+          [63] = function ( ) 
+            --d("in case 63")
+            if HarvestLogger.ItemsLog.rawMats.jewelry[itemLink] == nil then
+              --d("create entry in case 63")
+              HarvestLogger.ItemsLog.rawMats.jewelry[itemLink] = {}
+              HarvestLogger.savedVariables.ItemsLog.rawMats.jewelry[itemLink] = {}
+              --d("created empty table0")
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink] = {}
+              --d("created empty table1")
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink][quantity] = {}
+              --d("created empty table2")
+              HarvestLogger.ItemsLog.rawMats.jewelry[itemLink]["quantity"] =  quantity
+              HarvestLogger.savedVariables.ItemsLog.rawMats.jewelry[itemLink]["quantity"] =  quantity
+              --d("added quantity")
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink][quantity] = HarvestLogger.ItemsLog.rawMats.blacksmith[itemLink][quantity]
+              --d("created empty table in savedvar")
+            else
+              --d("case 63 wasn't null")
+              HarvestLogger.ItemsLog.rawMats.jewelry[itemLink]["quantity"] = HarvestLogger.ItemsLog.rawMats.jewelry[itemLink]["quantity"] + quantity
+              HarvestLogger.savedVariables.ItemsLog.rawMats.jewelry[itemLink]["quantity"] = HarvestLogger.ItemsLog.rawMats.jewelry[itemLink]["quantity"]
+            end
+          end,
+          [31] = function ( ) 
+            --d("in case 63")
+            if HarvestLogger.ItemsLog.rawMats.alchemy[itemLink] == nil then
+              --d("create entry in case 63")
+              HarvestLogger.ItemsLog.rawMats.alchemy[itemLink] = {}
+              HarvestLogger.savedVariables.ItemsLog.rawMats.alchemy[itemLink] = {}
+              --d("created empty table0")
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink] = {}
+              --d("created empty table1")
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink][quantity] = {}
+              --d("created empty table2")
+              HarvestLogger.ItemsLog.rawMats.alchemy[itemLink]["quantity"] =  quantity
+              HarvestLogger.savedVariables.ItemsLog.rawMats.alchemy[itemLink]["quantity"] =  quantity
+              --d("added quantity")
+              --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink][quantity] = HarvestLogger.ItemsLog.rawMats.blacksmith[itemLink][quantity]
+              --d("created empty table in savedvar")
+            else
+              --d("case 63 wasn't null")
+              HarvestLogger.ItemsLog.rawMats.alchemy[itemLink]["quantity"] = HarvestLogger.ItemsLog.rawMats.alchemy[itemLink]["quantity"] + quantity
+              HarvestLogger.savedVariables.ItemsLog.rawMats.alchemy[itemLink]["quantity"] = HarvestLogger.ItemsLog.rawMats.alchemy[itemLink]["quantity"]
+            end
+          end
+    }
+    
+    if case[itemType] then 
+      --d("do case")
+      case[itemType]()
+    else 
+      --d("do default")
+      case["default"]()
     end
+    --]]
+    
+    --HarvestLogger.savedVariables.ItemsLog = HarvestLogger.ItemsLog
+  end
 end
   
  function comma_value(amount)
@@ -233,7 +587,7 @@ function HarvestLogger.AddonSettings()
 		name = "Harvest Logger",
 		displayName = "Harvest logger settings",
 		author = "@TheLordRassilon",
-		version = "0.6",
+		version = "0.7",
 		registerForRefresh = true,
 		registerForDefaults = true
 	}
