@@ -133,19 +133,37 @@ end
       --HarvestLogger.savedVariables.ItemsLog = {}
       
       local displayRawMat = true
+      local stringArray = {}
       --d("before for")
       for key,value in pairs(HarvestLogger.ItemsLog) do
-        d("----------------1")
-        d(""..key)
-        for key2, value2 in pairs(value) do
-          d("----------------2")
-          d(""..key2)
-          for key3, value3 in pairs(value2) do
-            local icon, sellPrice, meetsUsageRequirement, equipType, itemStyle = GetItemLinkInfo (key3)
-            --d("got icon")
-            iconLogo = zo_strformat ( "|t24:24:<<1>>|t", icon )
-            
-            d("Looted "..value3.quantity.." "..iconLogo.." "..key3.." price X")
+        if next(value) then
+        --d("----------------1")
+        local d1 = false
+        --d(""..key)
+          for key2, value2 in pairs(value) do
+            d1 = false
+            if next(value) then
+              --d("----------------2")
+              --d(""..key2)
+              for key3, value3 in pairs(value2) do
+                d1 = false
+                if next(value) then
+                  local icon, sellPrice, meetsUsageRequirement, equipType, itemStyle = GetItemLinkInfo (key3)
+                  --d("got icon")
+                  iconLogo = zo_strformat ( "|t24:24:<<1>>|t", icon )
+                  d1 = true
+                  table.insert(stringArray, "Looted "..value3.quantity.." "..iconLogo.." "..key3.." price X")
+                end
+              end
+            end
+            if d1 then
+              table.insert(stringArray, "----------------2")
+              table.insert(stringArray, ""..key2)
+            end
+          end
+          if d1 then 
+            table.insert(stringArray, "---------1")
+            table.insert(stringArray, ""..key)
           end
         end
         --[[
@@ -160,6 +178,11 @@ end
         end
         --]]
         
+      end
+      
+      for i = #stringArray, 1, -1 do
+        value = stringArray[i]
+        d("".. value)
       end
       
       HarvestLogger.ItemsLog = {}
@@ -587,7 +610,7 @@ function HarvestLogger.AddonSettings()
 		name = "Harvest Logger",
 		displayName = "Harvest logger settings",
 		author = "@TheLordRassilon",
-		version = "0.7",
+		version = "0.7.2",
 		registerForRefresh = true,
 		registerForDefaults = true
 	}
