@@ -19,7 +19,7 @@ function HarvestLogger:Initialize()
   
    self.inCombat = IsUnitInCombat("player")
    
-   EVENT_MANAGER:RegisterForEvent(self.name, EVENT_PLAYER_COMBAT_STATE, self.OnPlayerCombatState)
+   --EVENT_MANAGER:RegisterForEvent(self.name, EVENT_PLAYER_COMBAT_STATE, self.OnPlayerCombatState)
    
    HarvestLogger.Default = {
      LogEnabled = true,
@@ -101,6 +101,8 @@ end
       d("Harvest logger timer switched off")
       d("Timer began "..HarvestLogger.savedVariables.TimeString)
       d("Timer ended "..os.date("%m/%d/%Y %I:%M %p"))
+      totalSecs = os.difftime(os.time(), HarvestLogger.Time)
+      totalMin = math.floor(totalSecs/60)
       diff = os.difftime(os.time(), HarvestLogger.Time)
       --d("time "..diff)
       hours = math.floor(diff/3600)
@@ -134,6 +136,7 @@ end
       
       local displayRawMat = true
       local stringArray = {}
+      local total = 0
       --d("before for")
       for key,value in pairs(HarvestLogger.ItemsLog) do
         if next(value) then
@@ -145,6 +148,9 @@ end
             if next(value) then
               --d("----------------2")
               --d(""..key2)
+              if key2 == "default" then
+                d("in default")
+              end
               for key3, value3 in pairs(value2) do
                 d1 = false
                 if next(value) then
@@ -152,7 +158,9 @@ end
                   --d("got icon")
                   iconLogo = zo_strformat ( "|t24:24:<<1>>|t", icon )
                   d1 = true
-                  table.insert(stringArray, "Looted "..value3.quantity.." "..iconLogo.." "..key3.." price X")
+                  local matCost = MasterMerchant:itemStats(key3)["avgPrice"]
+                  table.insert(stringArray, "Looted "..value3.quantity.." "..iconLogo.." "..key3.." price "..round(matCost*value3.quantity,2))
+                  total = total + round(matCost*value3.quantity,2)
                 end
               end
             end
@@ -184,10 +192,17 @@ end
         value = stringArray[i]
         d("".. value)
       end
+      d("total = "..total)
+      d("taux = "..round(total/totalMin,2).."/min") 
       
       HarvestLogger.ItemsLog = {}
       HarvestLogger.savedVariables.ItemsLog = {}
     end
+end
+ 
+ function round(num, numDecimalPlaces)
+  local mult = 10^(numDecimalPlaces or 0)
+  return math.floor(num * mult + 0.5) / mult
 end
  
 function HarvestLogger.LootReceived ( eventCode, lootedBy, itemLink, quantity, itemSound, lootType, self )
@@ -290,9 +305,9 @@ function HarvestLogger.LootReceived ( eventCode, lootedBy, itemLink, quantity, i
           HarvestLogger.ItemsLog.runes.aspect = {}
           HarvestLogger.ItemsLog.runes.essence = {}
 
-          d("created categories")
+          --d("created categories")
           HarvestLogger.savedVariables.ItemsLog = HarvestLogger.ItemsLog
-          d("created saved cat")
+          --d("created saved cat")
         end
         
         
@@ -302,9 +317,9 @@ function HarvestLogger.LootReceived ( eventCode, lootedBy, itemLink, quantity, i
             if HarvestLogger.ItemsLog.rawMats.blacksmith[itemLink] == nil then
               --d("create entry in case 35")
               HarvestLogger.ItemsLog.rawMats.blacksmith[itemLink] = {}
-              d("created empty table0")
+              --d("created empty table0")
               HarvestLogger.savedVariables.ItemsLog.rawMats.blacksmith[itemLink] = {}
-              d("created empty table1")
+              --d("created empty table1")
               --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink][quantity] = {}
               --d("created empty table2")
               HarvestLogger.ItemsLog.rawMats.blacksmith[itemLink]["quantity"] =  quantity
@@ -322,15 +337,15 @@ function HarvestLogger.LootReceived ( eventCode, lootedBy, itemLink, quantity, i
             end
           end,  
           ["default"] = function()
-            d("in case default")
+            --d("in case default")
             --HarvestLogger.ItemsLog[itemLink].quantity = HarvestLogger.ItemsLog[itemLink].quantity + quantity
             --HarvestLogger.savedVariables.ItemsLog[itemLink].quantity =  HarvestLogger.savedVariables.ItemsLog[itemLink].quantity + quantity
             if HarvestLogger.ItemsLog.rawMats.default[itemLink] == nil then
               HarvestLogger.ItemsLog.rawMats.default[itemLink] = {}
-              d("created empty table0")
+              --d("created empty table0")
               HarvestLogger.savedVariables.ItemsLog.rawMats.default[itemLink] = {}
               --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink] = {}
-              d("created empty table1")
+              --d("created empty table1")
               --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink][quantity] = {}
               --d("created empty table2")
               HarvestLogger.ItemsLog.rawMats.default[itemLink]["quantity"] =  quantity
@@ -340,9 +355,9 @@ function HarvestLogger.LootReceived ( eventCode, lootedBy, itemLink, quantity, i
               --HarvestLogger.saveVariables.ItemsLog.rawMats.blacksmith[itemLink][quantity] = HarvestLogger.ItemsLog.rawMats.blacksmith[itemLink][quantity]
               --d("created empty table in savedvar")
             else
-              d("case default wasn't null")
+              --d("case default wasn't null")
               HarvestLogger.ItemsLog.rawMats.default[itemLink]["quantity"] = HarvestLogger.ItemsLog.rawMats.default[itemLink]["quantity"] + quantity
-              d("case default not null done")
+              --d("case default not null done")
               HarvestLogger.savedVariables.ItemsLog.rawMats.default[itemLink]["quantity"] = HarvestLogger.ItemsLog.rawMats.default[itemLink]["quantity"]
             end
           end,
